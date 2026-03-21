@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; }
+
+    /* Login */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center; min-height: 100vh;
+      background: linear-gradient(135deg, #1e3a5f, #c0392b); padding: 16px;
+    }
+    .login-box {
+      background: white; padding: 36px 28px; border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 380px;
+    }
+    .login-box h2 { text-align: center; margin-bottom: 8px; color: #1e3a5f; font-size: 22px; }
+    .login-box p { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+    .login-box input {
+      width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px;
+      margin-bottom: 14px; font-size: 14px; outline: none;
+    }
+    .login-box input:focus { border-color: #c0392b; }
+    .login-box button {
+      width: 100%; padding: 12px; background: #c0392b; color: white;
+      border: none; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: 600;
+    }
+    .login-box button:hover { background: #a93226; }
+    #login-error { color: #c0392b; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+
+    /* Dashboard */
+    #dashboard { display: none; }
+    header {
+      background: #1e3a5f; color: white; padding: 14px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-size: 17px; }
+    header button {
+      background: rgba(255,255,255,0.15); border: none; color: white;
+      padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;
+      white-space: nowrap;
+    }
+    header button:hover { background: rgba(255,255,255,0.25); }
+
+    .content { padding: 20px; }
+    .stats { display: flex; gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      background: white; padding: 18px 20px; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07); flex: 1;
+    }
+    .stat-card .num { font-size: 30px; font-weight: 700; color: #1e3a5f; }
+    .stat-card .label { font-size: 12px; color: #888; margin-top: 4px; }
+
+    .table-wrap {
+      background: white; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden;
+    }
+    .table-header {
+      padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .table-header h2 { font-size: 15px; color: #1e3a5f; }
+    .table-header input {
+      padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 13px; outline: none; width: 100%; max-width: 240px;
+    }
+
+    /* Desktop table */
+    .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 580px; }
+    th { background: #f8fafc; padding: 11px 14px; text-align: left; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    td { padding: 12px 14px; font-size: 13px; border-top: 1px solid #f0f0f0; color: #333; }
+    tr:hover td { background: #fafafa; }
+
+    /* Mobile cards */
+    .mobile-cards { display: none; }
+    .customer-card { padding: 16px; border-bottom: 1px solid #f0f0f0; }
+    .customer-card:last-child { border-bottom: none; }
+    .card-name { font-size: 15px; font-weight: 600; color: #1e3a5f; margin-bottom: 8px; }
+    .card-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 13px; color: #555; word-break: break-all; }
+    .card-row i { color: #c0392b; width: 14px; margin-top: 2px; flex-shrink: 0; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 6px; }
+    .card-date { font-size: 11px; color: #aaa; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; background: #e8f5e9; color: #2e7d32;
+    }
+    #no-data { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 14px; }
+      header h1 { font-size: 14px; }
+      .content { padding: 12px; }
+      .stat-card { padding: 14px 16px; }
+      .stat-card .num { font-size: 26px; }
+      .stat-card .label { font-size: 11px; }
+      .table-header input { max-width: 100%; }
+      .tbl-scroll { display: none; }
+      .mobile-cards { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2><i class="fa-solid fa-shield-halved" style="color:#c0392b;margin-right:8px;"></i>Admin Panel</h2>
+    <p>BookMyShow — IPL Ticket Booking</p>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <div id="login-error">Invalid username or password</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <header>
+    <h1><i class="fa-solid fa-ticket-alt" style="margin-right:8px;"></i>Admin Dashboard</h1>
+    <button onclick="logout()"><i class="fa-solid fa-right-from-bracket" style="margin-right:6px;"></i>Logout</button>
+  </header>
+  <div class="content">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="num" id="total-count">0</div>
+        <div class="label">Total Submissions</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="today-count">0</div>
+        <div class="label">Today's Submissions</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h2><i class="fa-solid fa-users" style="margin-right:8px;color:#c0392b;"></i>Customer Information</h2>
+        <input type="text" id="search" placeholder="Search name, email, phone..." oninput="renderTable()" />
+      </div>
+      <div id="table-container">
+        <div id="no-data"><i class="fa-solid fa-inbox" style="font-size:28px;display:block;margin-bottom:10px;"></i>No customer data yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://localhost:3001/api";
+  let allCustomers = [];
+
+  async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errEl = document.getElementById("login-error");
+    errEl.style.display = "none";
+
+    try {
+      const res = await fetch(`${API}/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem("adminToken", data.token);
+        showDashboard();
+      } else {
+        errEl.style.display = "block";
+      }
+    } catch {
+      errEl.textContent = "Cannot connect to server. Make sure backend is running.";
+      errEl.style.display = "block";
+    }
+  }
+
+  document.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+  function logout() {
+    localStorage.removeItem("adminToken");
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  async function showDashboard() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    await loadCustomers();
+  }
+
+  async function loadCustomers() {
+    const token = localStorage.getItem("adminToken");
+    try {
+      const res = await fetch(`${API}/customers`, { headers: { Authorization: `Bearer ${token}` } });
+      allCustomers = await res.json();
+      updateStats();
+      renderTable();
+    } catch {
+      console.error("Failed to load customers");
+    }
+  }
+
+  function updateStats() {
+    document.getElementById("total-count").textContent = allCustomers.length;
+    const today = new Date().toDateString();
+    const todayCount = allCustomers.filter(c => new Date(c.submittedAt).toDateString() === today).length;
+    document.getElementById("today-count").textContent = todayCount;
+  }
+
+  function renderTable() {
+    const q = document.getElementById("search").value.toLowerCase();
+    const filtered = allCustomers.filter(c =>
+      c.fullName.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) ||
+      c.phone.includes(q)
+    );
+
+    const container = document.getElementById("table-container");
+    if (filtered.length === 0) {
+      container.innerHTML = `<div id="no-data"><i class="fa-solid fa-inbox" style="font-size:28px;display:block;margin-bottom:10px;"></i>No results found</div>`;
+      return;
+    }
+
+    const sorted = filtered.slice().reverse();
+
+    // Desktop table
+    const rows = sorted.map(c => {
+      const date = new Date(c.submittedAt).toLocaleString("en-IN");
+      return `<tr>
+        <td>${c.fullName}</td>
+        <td>${c.email}</td>
+        <td>${c.phone}</td>
+        <td>${c.match}</td>
+        <td>${date}</td>
+        <td><span class="badge">Submitted</span></td>
+      </tr>`;
+    }).join("");
+
+    // Mobile cards
+    const cards = sorted.map(c => {
+      const date = new Date(c.submittedAt).toLocaleString("en-IN");
+      return `<div class="customer-card">
+        <div class="card-name"><i class="fa-solid fa-user" style="color:#c0392b;margin-right:6px;"></i>${c.fullName}</div>
+        <div class="card-row"><i class="fa-solid fa-envelope"></i>${c.email}</div>
+        <div class="card-row"><i class="fa-solid fa-phone"></i>${c.phone}</div>
+        <div class="card-row"><i class="fa-solid fa-cricket-bat-ball"></i>${c.match}</div>
+        <div class="card-footer">
+          <span class="card-date"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>${date}</span>
+          <span class="badge">Submitted</span>
+        </div>
+      </div>`;
+    }).join("");
+
+    container.innerHTML = `
+      <div class="tbl-scroll"><table>
+        <thead><tr>
+          <th>Full Name</th><th>Email Address</th><th>Phone Number</th>
+          <th>Match</th><th>Submitted At</th><th>Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <div class="mobile-cards">${cards}</div>`;
+  }
+
+  // Auto-login if token exists
+  if (localStorage.getItem("adminToken")) showDashboard();
+</script>
+</body>
+</html>
