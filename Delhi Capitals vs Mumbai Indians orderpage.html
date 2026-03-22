@@ -414,7 +414,11 @@ src="https://www.facebook.com/tr?id=920302927412926&ev=PageView&noscript=1"
       const match = matchEl ? matchEl.textContent : window.location.pathname;
 
       try {
+<<<<<<< HEAD
         await fetch("https://backend-psi-ebon-44.vercel.app/api/customers", {
+=======
+        await fetch("http://localhost:3001/api/customers", {
+>>>>>>> b58e49c1a8928dd84a8cd6931d99c6fe0b1083a1
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fullName, email, phone, match })
@@ -425,4 +429,8 @@ src="https://www.facebook.com/tr?id=920302927412926&ev=PageView&noscript=1"
     });
   });
 </script>
+<<<<<<< HEAD
 </body></html>
+=======
+</body></html>
+>>>>>>> b58e49c1a8928dd84a8cd6931d99c6fe0b1083a1

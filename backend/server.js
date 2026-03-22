@@ -5,7 +5,11 @@ const { Pool } = require("pg");
 const app = express();
 const PORT = 3001;
 
+<<<<<<< HEAD
 app.use(cors({ origin: "https://frontend-one-khaki-53.vercel.app" }));
+=======
+app.use(cors());
+>>>>>>> b58e49c1a8928dd84a8cd6931d99c6fe0b1083a1
 app.use(express.json());
 
 const pool = new Pool({
